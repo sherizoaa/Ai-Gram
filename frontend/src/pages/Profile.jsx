@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
+import BottomNav from '../components/BottomNav'
 import api from '../utils/api'
 
 export default function Profile() {
@@ -36,6 +37,7 @@ export default function Profile() {
   if (loading) return (
     <div style={s.page}>
       <Navbar />
+      <BottomNav />
       <div style={s.loading}>
         <div style={s.loadingAvatar} />
         <div style={s.loadingLine} />
@@ -46,6 +48,7 @@ export default function Profile() {
   if (!profile) return (
     <div style={s.page}>
       <Navbar />
+      <BottomNav />
       <div style={s.notFound}>User not found</div>
     </div>
   )
@@ -133,12 +136,13 @@ export default function Profile() {
           </div>
         )}
       </main>
+      <BottomNav />
     </div>
   )
 }
 
 const s = {
-  page: { background: 'var(--color-bg)', minHeight: '100dvh' },
+  page: { background: '#f5f5f8', minHeight: '100dvh', paddingBottom: '80px' },
   main: { maxWidth: '680px', margin: '0 auto', padding: '24px 16px' },
   loading: { maxWidth: '680px', margin: '40px auto', padding: '0 16px' },
   loadingAvatar: { width: '80px', height: '80px', borderRadius: '50%', background: '#e5e7eb', marginBottom: '16px' },

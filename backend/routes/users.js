@@ -3,6 +3,23 @@ const router = express.Router()
 const pool = require('../config/db')
 const auth = require('../middleware/auth')
 
+// Get top creators by follower count
+router.get('/top', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT u.id, u.username, u.avatar_url, u.bio,
+        COUNT(f.follower_id) AS followers_count
+       FROM users u
+       LEFT JOIN follows f ON f.following_id = u.id
+       GROUP BY u.id
+       ORDER BY followers_count DESC LIMIT 10`
+    )
+    res.json(result.rows)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
 // Get user profile
 router.get('/:id', async (req, res) => {
   try {

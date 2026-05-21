@@ -3,13 +3,39 @@ const router = express.Router()
 const pool = require('../config/db')
 const auth = require('../middleware/auth')
 
-// Get all posts (feed)
+// Get all posts (feed) with counts
 router.get('/', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT posts.*, users.username, users.avatar_url
-       FROM posts JOIN users ON posts.user_id = users.id
+      `SELECT posts.*, users.username, users.avatar_url,
+        COUNT(DISTINCT l.user_id) AS likes_count,
+        COUNT(DISTINCT c.id) AS comments_count
+       FROM posts
+       JOIN users ON posts.user_id = users.id
+       LEFT JOIN likes l ON l.post_id = posts.id
+       LEFT JOIN comments c ON c.post_id = posts.id
+       GROUP BY posts.id, users.username, users.avatar_url
        ORDER BY posts.created_at DESC LIMIT 50`
+    )
+    res.json(result.rows)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// Get trending posts (most liked)
+router.get('/trending', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT posts.*, users.username, users.avatar_url,
+        COUNT(DISTINCT l.user_id) AS likes_count,
+        COUNT(DISTINCT c.id) AS comments_count
+       FROM posts
+       JOIN users ON posts.user_id = users.id
+       LEFT JOIN likes l ON l.post_id = posts.id
+       LEFT JOIN comments c ON c.post_id = posts.id
+       GROUP BY posts.id, users.username, users.avatar_url
+       ORDER BY likes_count DESC, posts.created_at DESC LIMIT 20`
     )
     res.json(result.rows)
   } catch (err) {
