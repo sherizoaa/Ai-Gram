@@ -13,5 +13,14 @@ app.use('/api/posts', require('./routes/posts'))
 app.use('/api/users', require('./routes/users'))
 app.use('/api/upload', require('./routes/upload'))
 
+// Health check for Render
+app.get('/health', (req, res) => res.json({ ok: true }))
+
 const PORT = process.env.PORT || 3001
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+
+require('./config/initDb')().then(() => {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+}).catch(err => {
+  console.error('DB init failed:', err)
+  process.exit(1)
+})

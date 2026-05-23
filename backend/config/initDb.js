@@ -1,0 +1,46 @@
+const pool = require('./db')
+
+module.exports = async function initDb() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(50) UNIQUE NOT NULL,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      password_hash VARCHAR(255) NOT NULL,
+      bio TEXT,
+      avatar_url TEXT,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS posts (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      media_url TEXT NOT NULL,
+      media_type VARCHAR(20),
+      caption TEXT,
+      tags TEXT[],
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS likes (
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+      PRIMARY KEY (user_id, post_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS comments (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+      text TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS follows (
+      follower_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      following_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      PRIMARY KEY (follower_id, following_id)
+    );
+  `)
+  console.log('✓ DB tables ready')
+}
